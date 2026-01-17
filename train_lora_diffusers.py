@@ -162,7 +162,7 @@ def main():
         opt.zero_grad(set_to_none=True)
 
         for step, (images, captions) in enumerate(pbar):
-            images = images.to(device, dtype=torch.float32)  # VAE encode préfère fp32 input
+            images = images.to(device, dtype=dtype)  # VAE encode préfère fp32 input
 
             # Tokenize
             text_inputs = tokenizer(
@@ -175,9 +175,11 @@ def main():
 
             with torch.no_grad():
                 encoder_hidden_states = pipe.text_encoder(text_inputs)[0]
+                images = images.to(dtype=pipe.vae.dtype)  
                 latents = pipe.vae.encode(images).latent_dist.sample()
                 latents = latents * pipe.vae.config.scaling_factor
                 latents = latents.to(device, dtype=dtype)
+
 
             noise = torch.randn_like(latents)
             timesteps = torch.randint(
