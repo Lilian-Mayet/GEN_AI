@@ -7,7 +7,8 @@ from PIL import Image
 from tqdm import tqdm
 
 from diffusers import StableDiffusionPipeline, DDPMScheduler
-from diffusers.models.attention_processor import LoRAAttnProcessor
+from diffusers.models.attention_processor import LoRAAttnProcessor2_0
+
 from transformers import CLIPTokenizer
 
 class SpriteDataset(Dataset):
@@ -44,19 +45,19 @@ def set_lora(pipe, rank: int = 8):
     unet = pipe.unet
     lora_attn_procs = {}
 
-    for name in unet.attn_processors.keys():
+    for name, proc in unet.attn_processors.items():
         cross_attention_dim = None
         if name.endswith("attn2.processor"):
             cross_attention_dim = unet.config.cross_attention_dim
 
-        # Version diffusers compatible: pas de hidden_size ici
-        lora_attn_procs[name] = LoRAAttnProcessor(
+        lora_attn_procs[name] = LoRAAttnProcessor2_0(
             cross_attention_dim=cross_attention_dim,
             rank=rank,
         )
 
     unet.set_attn_processor(lora_attn_procs)
     return pipe
+
 
 
 def save_lora_weights(pipe, out_dir: Path):
