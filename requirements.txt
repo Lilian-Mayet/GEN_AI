@@ -1,0 +1,21 @@
+# Base
+numpy
+pandas
+pillow
+tqdm
+
+# Deep Learning
+torch
+torchvision
+accelerate
+
+# Diffusion (si vous choisissez cette approche)
+diffusers
+transformers
+
+# Monitoring
+wandb
+tensorboard
+
+# Utils
+matplotlib

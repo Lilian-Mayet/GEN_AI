@@ -1,0 +1,12 @@
+torch>=2.1
+torchvision
+accelerate>=0.26
+diffusers>=0.25
+transformers>=4.36
+safetensors
+pillow
+opencv-python
+tqdm
+pandas
+numpy
+scikit-image
