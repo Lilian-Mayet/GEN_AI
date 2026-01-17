@@ -41,24 +41,23 @@ def collate_fn(batch):
     return images, captions
 
 def set_lora(pipe, rank: int = 8):
-    # Apply LoRA attention processors to UNet
     unet = pipe.unet
     lora_attn_procs = {}
-    for name, attn_processor in unet.attn_processors.items():
-        # dimensions
+
+    for name in unet.attn_processors.keys():
         cross_attention_dim = None
         if name.endswith("attn2.processor"):
             cross_attention_dim = unet.config.cross_attention_dim
-        hidden_size = attn_processor.hidden_size if hasattr(attn_processor, "hidden_size") else None
-        # Fallback: infer hidden size from module name
-        # Many SD1.5 unets use 320/640/1280 blocks; LoRAAttnProcessor can be created without hidden_size if needed.
+
+        # Version diffusers compatible: pas de hidden_size ici
         lora_attn_procs[name] = LoRAAttnProcessor(
-            hidden_size=hidden_size,
             cross_attention_dim=cross_attention_dim,
             rank=rank,
         )
+
     unet.set_attn_processor(lora_attn_procs)
     return pipe
+
 
 def save_lora_weights(pipe, out_dir: Path):
     out_dir.mkdir(parents=True, exist_ok=True)
