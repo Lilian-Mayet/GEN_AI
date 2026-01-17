@@ -67,20 +67,19 @@ def set_lora(pipe, rank: int = 16):
 
 
 def get_lora_params(unet) -> list[torch.nn.Parameter]:
-    """
-    Après add_adapter(), PEFT ajoute des paramètres LoRA dans l'UNet.
-    On ne garde que ceux-là pour l'optimizer.
-    """
     trainable = []
     for name, p in unet.named_parameters():
         if "lora" in name.lower():
             p.requires_grad = True
+            if p.dtype != torch.float32:
+                p.data = p.data.float()
             trainable.append(p)
         else:
             p.requires_grad = False
     if len(trainable) == 0:
         raise RuntimeError("No LoRA params found (expected 'lora' in parameter names).")
     return trainable
+
 
 
 def save_lora_weights(pipe, out_dir: Path):
@@ -135,6 +134,12 @@ def main():
     # Add LoRA
     pipe = set_lora(pipe, rank=args.rank)
     pipe.to(device)
+
+    # Force LoRA weights to fp32 to work with GradScaler (avoid FP16 grads unscale error)
+    for name, p in pipe.unet.named_parameters():
+        if "lora" in name.lower():
+            p.data = p.data.float()
+
 
     # Freeze non-LoRA parts
     pipe.vae.requires_grad_(False)
