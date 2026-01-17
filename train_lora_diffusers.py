@@ -83,11 +83,10 @@ def get_lora_params(unet) -> list[torch.nn.Parameter]:
 
 
 def save_lora_weights(pipe, out_dir: Path):
-    """
-    Sauvegarde l'adapter LoRA (format PEFT) directement depuis l'UNet.
-    """
     out_dir.mkdir(parents=True, exist_ok=True)
-    pipe.unet.save_pretrained(out_dir)
+    # Sauvegarde UNIQUEMENT la LoRA (léger)
+    pipe.save_lora_weights(out_dir) 
+
 
 
 def load_file_list(list_path: Path):
@@ -106,6 +105,8 @@ def main():
     ap.add_argument("--batch_size", type=int, default=4)
     ap.add_argument("--epochs", type=int, default=12)
     ap.add_argument("--grad_accum", type=int, default=1)
+    ap.add_argument("--save_every", type=int, default=0,
+                help="Save LoRA every N epochs (0 = only final).")
     ap.add_argument("--mixed_precision", type=str, default="fp16", choices=["no", "fp16", "bf16"])
     ap.add_argument("--seed", type=int, default=42)
     args = ap.parse_args()
@@ -208,8 +209,8 @@ def main():
 
             pbar.set_postfix({"loss": f"{loss.item():.4f}", "step": global_step})
 
-        # Save checkpoint each epoch
-        save_lora_weights(pipe, out_dir / f"checkpoint_epoch_{epoch+1}")
+        if args.save_every and ((epoch + 1) % args.save_every == 0):
+            save_lora_weights(pipe, out_dir / f"checkpoint_epoch_{epoch+1}")
 
     # Final save
     save_lora_weights(pipe, out_dir / "final")
