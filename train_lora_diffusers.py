@@ -45,18 +45,13 @@ def set_lora(pipe, rank: int = 8):
     unet = pipe.unet
     lora_attn_procs = {}
 
-    for name, proc in unet.attn_processors.items():
-        cross_attention_dim = None
-        if name.endswith("attn2.processor"):
-            cross_attention_dim = unet.config.cross_attention_dim
-
-        lora_attn_procs[name] = LoRAAttnProcessor2_0(
-            cross_attention_dim=cross_attention_dim,
-            rank=rank,
-        )
+    for name in unet.attn_processors.keys():
+        # Version compatible: certains diffusers n'acceptent aucun kwarg autre que rank
+        lora_attn_procs[name] = LoRAAttnProcessor2_0(rank=rank)
 
     unet.set_attn_processor(lora_attn_procs)
     return pipe
+
 
 
 
