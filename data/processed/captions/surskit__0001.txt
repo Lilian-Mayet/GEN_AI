@@ -1,0 +1,1 @@
+pixel sprite, monster, front view, type_bug, type_water

@@ -7,8 +7,10 @@ BASE_PREFIX = "pixel sprite, monster, front view"
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--processed_dir", type=str, required=True, help="data/processed")
-    ap.add_argument("--prefix", type=str, default=BASE_PREFIX)
+    ap.add_argument("--processed_dir", type=str, default="data/processed",
+                    help="Directory with processed data (default: data/processed)")
+    ap.add_argument("--prefix", type=str, default=BASE_PREFIX,
+                    help=f"Prefix for captions (default: '{BASE_PREFIX}')")
     args = ap.parse_args()
 
     processed = Path(args.processed_dir)

@@ -53,10 +53,28 @@ Cela va :
 python prepare_dataset.py --raw_dir ../downloads --out_dir data/processed --size 128 --types_csv ../downloads/pokemon_data.csv
 ```
 
-### Étape 3 : Vérifier le résultat
+### Étape 3 : Générer les captions
 
-Après exécution, vous aurez :
+**Commande de base :**
+```bash
+python build_caption.py
+```
+
+Cela va créer un fichier `.txt` pour chaque image avec le format :
+```
+pixel sprite, monster, front view, type_grass, type_poison
+```
+
+**Commande avec options personnalisées :**
+```bash
+python build_caption.py --processed_dir data/processed --prefix "pixel art sprite, creature"
+```
+
+### Étape 4 : Vérifier le résultat
+
+Après exécution complète, vous aurez :
 - `data/processed/images/` : toutes les images redimensionnées (ex: `bulbasaur__0000.png`)
+- `data/processed/captions/` : fichiers texte avec les captions (ex: `bulbasaur__0000.txt`)
 - `data/processed/metadata.csv` : fichier avec colonnes `image`, `pokemon_name`, `type1`, `type2`
 
 ## 📊 Format du dataset final
