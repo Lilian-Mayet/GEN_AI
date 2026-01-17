@@ -5,10 +5,11 @@ from diffusers import StableDiffusionPipeline
 from PIL import Image
 
 def load_lora(pipe, lora_path: Path):
-    # lora_path points to folder containing lora_unet_attn_procs.pt
-    state = torch.load(lora_path / "lora_unet_attn_procs.pt", map_location="cpu")
-    pipe.unet.set_attn_processor(state)
+    # Charge l'adapter LoRA PEFT dans l'UNet
+    pipe.unet.load_adapter(str(lora_path), adapter_name="sprite_lora")
+    pipe.unet.set_adapter("sprite_lora")
     return pipe
+
 
 def main():
     ap = argparse.ArgumentParser()
