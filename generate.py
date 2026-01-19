@@ -1,14 +1,13 @@
 import argparse
 from pathlib import Path
 import torch
-from diffusers import StableDiffusionPipeline
-from peft import PeftModel
+from diffusers import StableDiffusionPipeline, UNet2DConditionModel
 
 
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--base_model", type=str, default="runwayml/stable-diffusion-v1-5")
-    ap.add_argument("--lora_dir", type=str, required=True)
+    ap.add_argument("--ckpt_dir", type=str, required=True, help="Folder with config.json + diffusion_pytorch_model.safetensors")
     ap.add_argument("--prompt", type=str, required=True)
     ap.add_argument("--out", type=str, default="outputs/samples/out.png")
     ap.add_argument("--steps", type=int, default=30)
@@ -27,11 +26,16 @@ def main():
         requires_safety_checker=False,
     ).to(device)
 
-    # Charger LoRA PEFT
-    pipe.unet = PeftModel.from_pretrained(pipe.unet, args.lora_dir).to(device)
+    # Load trained UNet checkpoint (full model)
+    unet = UNet2DConditionModel.from_pretrained(
+        args.ckpt_dir,
+        torch_dtype=dtype,
+        low_cpu_mem_usage=False,
+        device_map=None,
+    ).to(device)
+    pipe.unet = unet
 
     g = torch.Generator(device=device).manual_seed(args.seed)
-
     img = pipe(
         prompt=args.prompt,
         height=args.size,
