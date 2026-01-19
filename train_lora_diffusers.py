@@ -9,6 +9,7 @@ from tqdm import tqdm
 from diffusers import StableDiffusionPipeline, DDPMScheduler
 from peft import LoraConfig
 from transformers import CLIPTokenizer
+import numpy as np
 
 
 class SpriteDataset(Dataset):
