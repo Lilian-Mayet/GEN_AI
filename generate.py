@@ -3,6 +3,8 @@ from pathlib import Path
 import torch
 from diffusers import StableDiffusionPipeline
 from PIL import Image
+import numpy as np
+
 
 def load_lora(pipe, lora_path: Path):
     # Charge l'adapter LoRA PEFT dans l'UNet

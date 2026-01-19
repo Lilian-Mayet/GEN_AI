@@ -29,14 +29,14 @@ class SpriteDataset(Dataset):
         # Load image (RGB) -> tensor in [-1, 1]
         img = Image.open(img_path).convert("RGB")
 
-        # PIL -> torch tensor (C,H,W), float32
-        x = torch.from_numpy(
-            (torch.ByteTensor(torch.ByteStorage.from_buffer(img.tobytes()))
-             .view(img.size[1], img.size[0], 3)
-             .numpy())
-        ).float() / 255.0
-        x = x.permute(2, 0, 1).contiguous()
-        x = x * 2.0 - 1.0
+        # IMPORTANT : resize explicite + NEAREST pour pixel art
+        if self.size is not None:
+            img = img.resize((self.size, self.size), resample=Image.NEAREST)
+
+        arr = np.array(img, dtype=np.float32) / 255.0      # HWC [0,1]
+        x = torch.from_numpy(arr).permute(2, 0, 1).contiguous()  # CHW
+        x = x * 2.0 - 1.0                                   # [-1,1]
+
 
         caption = cap_path.read_text(encoding="utf-8").strip()
         return x, caption
@@ -84,8 +84,9 @@ def get_lora_params(unet) -> list[torch.nn.Parameter]:
 
 def save_lora_weights(pipe, out_dir: Path):
     out_dir.mkdir(parents=True, exist_ok=True)
-    # Sauvegarde UNIQUEMENT la LoRA (léger)
-    pipe.save_lora_weights(out_dir) 
+    # Sauvegarde l'adapter LoRA (PEFT) -> léger
+    pipe.unet.save_pretrained(out_dir)
+
 
 
 
