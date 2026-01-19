@@ -1,0 +1,9 @@
+# Checkpoints et modèles
+*.safetensors
+*.ckpt
+*.pth
+*.pt
+lora_checkpoint/
+checkpoints/
+models/
+*.bin
